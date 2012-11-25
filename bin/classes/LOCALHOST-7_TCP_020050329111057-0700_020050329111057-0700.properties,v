@@ -1,0 +1,44 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  v1:1.1.1.1 Cybertristam:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2005.03.30.06.18.57;  author jwright;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2005.03.30.06.18.57;  author jwright;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@address = LOCALHOST
+portNumber = 7
+connectionType = TCP
+connectionStartTime = 1112163057613
+connectionEndTime = 1112163057614
+statusType = CONNECTED
+@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@

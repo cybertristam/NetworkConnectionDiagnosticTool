@@ -1,0 +1,112 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  v1:1.1.1.1 Cybertristam:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/**
+ * AUTHOR: jewright
+ * DATE/TIME:  Mar 28, 2005
+ * PROGRAM/FILENAME: net.cybertristam.service.FileIniStatisticsSvcImpl
+ * EXPLANATION:
+ * TEST DATA & EXPECTED RESULTS:
+ * ENTRY:
+ * EXPECTED RESULTS:
+ * REVISION HISTORY:
+ * VERSION NUMBER     DATE       AUTHOR
+ *     1           Mar 28, 2005      jewright
+ * REQUIREMENTS:
+ * EDITOR/IDE: IntelliJ IDEA with VIM Keymap.
+ */
+
+package net.cybertristam.service;
+
+import net.cybertristam.dataObjects.Statistics;
+import net.cybertristam.dataObjects.ServerStatistics;
+import net.cybertristam.dataObjects.ConnectionStatus;
+import net.cybertristam.exception.StatisticsRetrieveException;
+import net.cybertristam.exception.StatisticsStoreException;
+
+import java.util.*;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+
+public class FileIniStatisticsSvcImpl extends IFileStatisticsSvc {
+    private FilePropertiesReader fpr = new FilePropertiesReader(this.getClass().getSimpleName());
+    protected String fileSuffix = ".properties";
+
+    public Boolean save(Statistics stat) throws StatisticsStoreException {
+        String filename = "default";
+        String savePath = fpr.getProperty("SavePath");
+        String fileSuffix = fpr.getProperty("FileSuffix");
+        DateFormat dateFormat = new SimpleDateFormat(fpr.getProperty("DateFormat"));
+        //Get the List of Sockets.
+        List sockets = stat.getSockets();
+        FileWriter fos;
+        //Write the List of Sockets out as individual files.
+        Iterator socketIterator = sockets.iterator();
+        for (int i = 0; i < sockets.size(); i++) {
+            ConnectionStatus socketToSave = (ConnectionStatus) socketIterator.next();
+            filename = getFilename(socketToSave);
+            try {
+                fos = new FileWriter(filename);
+                fos.write(socketToSave.toString());
+                fos.flush();
+                fos.close();
+            } catch (IOException ex) {
+                exceptionError(ex);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected ConnectionStatus getConnectionFile(String filename) {
+        ConnectionStatus returnStatus = new ConnectionStatus();
+        FilePropertiesReader tempReader = new FilePropertiesReader(parseFilename(filename));
+        returnStatus.setAddress(tempReader.getProperty("address"));
+        returnStatus.setPortNumber(tempReader.getProperty("portNumber"));
+        Calendar tempCalendar = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+        tempCalendar.setTimeInMillis(new Long(tempReader.getProperty("connectionStartTime")).longValue());
+        returnStatus.setConnectionStartTime(tempCalendar);
+        tempCalendar.setTimeInMillis(new Long(tempReader.getProperty("connectionEndTime")).longValue());
+        returnStatus.setConnectionEndTime(tempCalendar);
+        returnStatus.setConnectionType(tempReader.getProperty("connectionType"));
+        returnStatus.setStatusType(tempReader.getProperty("statusType"));
+        return returnStatus;
+    }
+
+}
+@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@

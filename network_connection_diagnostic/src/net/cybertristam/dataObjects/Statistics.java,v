@@ -1,0 +1,93 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	v1:1.1.1.1
+	Cybertristam:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2005.04.15.04.06.58;	author jwright;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2005.04.15.04.06.58;	author jwright;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/**
+ * AUTHOR: jewright
+ * DATE/TIME:  Mar 21, 2005
+ * PROGRAM/FILENAME: net.cybertristam.dataObjects.Statistics
+ * EXPLANATION:
+ * TEST DATA & EXPECTED RESULTS:
+ * ENTRY:
+ * EXPECTED RESULTS:
+ * REVISION HISTORY:
+ * VERSION NUMBER     DATE       AUTHOR
+ *     1           Mar 21, 2005      jewright
+ * REQUIREMENTS:
+ * EDITOR/IDE: IntelliJ IDEA with VIM Keymap.
+ */
+
+package net.cybertristam.dataObjects;
+
+import java.util.List;
+
+public abstract class Statistics {
+    public static final String TCP = "TCP";
+    public static final String UDP = "UDP";
+    private String address; //This is the hostname/IP address.
+    private Integer portNumber;
+    private List sockets; //This is a Collection of SocketStatistics.
+
+    public Statistics() {
+    }
+
+    public Integer getPortNumber() {
+        return portNumber;
+    }
+
+    public void setPortNumber(Integer portNumber) {
+        this.portNumber = portNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public List getSockets() {
+        return sockets;
+    }
+
+    public void setSockets(List sockets) {
+        this.sockets = sockets;
+    }
+}
+@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@

@@ -1,0 +1,176 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  v1:1.1.1.1 Cybertristam:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/**
+ * AUTHOR: jewright
+ * DATE/TIME:  Apr 13, 2005
+ * PROGRAM/FILENAME: net.cybertristam.service.JDBCStatisticsSvcImpl
+ * EXPLANATION:
+ * TEST DATA & EXPECTED RESULTS:
+ * ENTRY:
+ * EXPECTED RESULTS:
+ * REVISION HISTORY:
+ * VERSION NUMBER     DATE       AUTHOR
+ *     1           Apr 13, 2005      jewright
+ * REQUIREMENTS:
+ * EDITOR/IDE: IntelliJ IDEA with VIM Keymap.
+ */
+
+package net.cybertristam.service;
+
+import net.cybertristam.dataObjects.Statistics;
+import net.cybertristam.dataObjects.ServerStatistics;
+import net.cybertristam.dataObjects.ConnectionStatus;
+import net.cybertristam.exception.StatisticsRetrieveException;
+import net.cybertristam.exception.StatisticsStoreException;
+
+import java.sql.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
+public class JDBCStatisticsSvcImpl implements IStatisticsSvc {
+
+    Connection conn = retrieveConnection();
+    String defQueryStmt = "select * from connection_status ";
+
+    public Statistics retrieve(String address) throws StatisticsRetrieveException {
+		Statistics stats = new ServerStatistics();
+        try {
+            Statement stmt = conn.createStatement();
+            String queryStmt = defQueryStmt + "where address = " + address;
+            ResultSet rs = stmt.executeQuery(queryStmt);
+			stats.setSockets(buildConnStatusListFromResultSet(rs));
+			stats.setAddress(address);
+        }
+        catch (SQLException ex) {
+            exceptionError(ex);
+        }
+        return stats;
+    }
+
+    public Statistics retrieve(Integer portNumber, String key) throws StatisticsRetrieveException {
+		Statistics stats = (Statistics) Factory.getInstance().getService(key);
+        try {
+            Statement stmt = conn.createStatement();
+            String queryStmt = defQueryStmt + "where port_number = " + portNumber;
+            ResultSet rs = stmt.executeQuery(queryStmt);
+			stats.setSockets(buildConnStatusListFromResultSet(rs));
+			stats.setPortNumber(portNumber);
+        }
+        catch (SQLException ex) {
+            exceptionError(ex);
+        }
+        return stats;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Statistics retrieve(String address, Integer portNumber, String key) throws StatisticsRetrieveException {
+
+        Statistics stats = (Statistics) Factory.getInstance().getService(key);
+        try {
+            Statement stmt = conn.createStatement();
+            String queryStmt = defQueryStmt + "where address = " + address + " and port_number = " + portNumber;
+            ResultSet rs = stmt.executeQuery(queryStmt);
+            stats.setSockets(buildConnStatusListFromResultSet(rs));
+			stats.setAddress(address);
+			stats.setPortNumber(portNumber);
+        }
+
+        catch (SQLException ex) {
+            exceptionError(ex);
+			stats = null;
+        }
+        return stats;
+    }
+
+    public Boolean save(Statistics stat) throws StatisticsStoreException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    private Connection retrieveConnection() {
+        Connection conn = null;
+        try {
+            FilePropertiesReader fpr = new FilePropertiesReader(this.getClass().getSimpleName());
+            String jdbcDriver = fpr.getProperty("jdbcDriver");
+            Class.forName(jdbcDriver).newInstance();
+            String jdbcURI = fpr.getProperty("jdbcURI");
+            conn = DriverManager.getConnection(jdbcURI);
+        }
+        catch (InstantiationException ex) {
+            exceptionError(ex);
+        }
+        catch (IllegalAccessException ex) {
+            exceptionError(ex);
+        }
+        catch (ClassNotFoundException ex) {
+            exceptionError(ex);
+        }
+        catch (SQLException ex) {
+            exceptionError(ex);
+        }
+		return conn;
+    }
+    private List buildConnStatusListFromResultSet(ResultSet rs) {
+        List returnList = new ArrayList();
+        ConnectionStatus connStatus = new ConnectionStatus();
+        try {
+			while(rs.next()){
+            connStatus.setAddress(rs.getString("address"));
+			Calendar tempCalendar = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+			tempCalendar.setTimeInMillis(rs.getLong("connection_end_time"));
+			connStatus.setConnectionEndTime(tempCalendar);
+			tempCalendar.setTimeInMillis(rs.getLong("connection_start_time"));
+			connStatus.setConnectionStartTime(tempCalendar);
+			connStatus.setConnectionType(rs.getString("connection_type"));
+			connStatus.setPortNumber(rs.getString("port_number"));
+			connStatus.setStatusType(rs.getString("status_type"));
+			returnList.add(connStatus);
+			}
+        }
+        catch (SQLException ex) {
+            exceptionError(ex);
+        }
+		return returnList;
+    }
+
+    protected void exceptionError(Exception ex) {
+        ex.printStackTrace();
+    }
+}
+@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@

@@ -1,0 +1,126 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  v1:1.1.1.1 Cybertristam:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@package net.cybertristam.presentation;
+
+import net.cybertristam.dataObjects.Statistics;
+import net.cybertristam.dataObjects.TCPPortStatistics;
+import net.cybertristam.service.Factory;
+import net.cybertristam.business.StatisticsToolMgr;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.io.File;
+
+public class StatisticsToolManagerUI extends JFrame {
+    JButton enterButton;
+    JTextField addressInput;
+    JTextField portNumberInput;
+    JTextArea resultsArea;
+
+
+    public StatisticsToolManagerUI(){
+        super("Network Connection Statistics Tool");
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Container mainContainer = this.getContentPane();
+        JPanel inputPanel = new JPanel();
+        //Begin adding Address UI Objects
+        JPanel addressPanel = new JPanel();
+        JLabel addressLabel = new JLabel("Address");
+        addressLabel.setToolTipText("The Hostname/IP Address of the Machine To Pull Statistics On.");
+        addressPanel.add(addressLabel);
+        addressInput = new JTextField(5);
+        addressPanel.add(addressInput);
+        inputPanel.add(addressPanel,BorderLayout.WEST);
+        //End of Address UI Objects
+        //Begin of Port Number UI Objects
+        JPanel portNumberPanel = new JPanel();
+        JLabel portNumberLabel = new JLabel("Port Number");
+        portNumberLabel.setToolTipText("The Port Number of the Machine(s) To Pull Statistics On.");
+        portNumberPanel.add(portNumberLabel);
+        portNumberInput = new JTextField(5);
+        portNumberPanel.add(portNumberInput);
+        inputPanel.add(portNumberPanel,BorderLayout.CENTER);
+        //End of Port Number UI Objects
+        //Begin of Enter Button
+        enterButton = new JButton("Enter");
+        inputPanel.add(enterButton,BorderLayout.EAST);
+        //End of Enter Button
+        //Begin Result Display Area
+        resultsArea = new JTextArea(10,2);
+        resultsArea.setBackground(Color.BLACK);
+        resultsArea.setForeground(Color.WHITE);
+        resultsArea.setEditable(false);
+        //Add UI Objects to Main UI
+        mainContainer.add(inputPanel,BorderLayout.CENTER);
+        mainContainer.add(resultsArea,BorderLayout.SOUTH);
+        pack();
+        setVisible(true);
+    }
+
+    public void addListener(ActionListener listener){
+        enterButton.addActionListener(listener);
+    }
+
+    public void setResults(String resultsText) {
+        resultsArea.setText(resultsText);
+    }
+
+    public Statistics getData(){
+        //Statistics returnStats = (Statistics) Factory.getInstance().getService(Statistics.TCP);
+        Statistics returnStats = new TCPPortStatistics();
+        returnStats.setAddress(addressInput.getText());
+        returnStats.setPortNumber(new Integer(portNumberInput.getText()));
+        return returnStats;
+    }
+
+
+	/**
+	 * @@param args
+	 */
+	public static void main(String[] args) {
+        StatisticsToolManagerUI stm = new StatisticsToolManagerUI();
+        //StatisticsToolController stc = new StatisticsToolController();
+        stm.addListener(new StatisticsToolController(stm));
+		// TODO Auto-generated method stub
+
+	}
+
+}
+@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@

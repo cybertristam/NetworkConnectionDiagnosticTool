@@ -1,0 +1,40 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  v1:1.1.1.1 Cybertristam:1.1.1;
+locks    ; strict;
+comment  @# @;
+expand   @b@;
+
+
+1.1
+date     2005.04.22.03.00.33;  author jwright;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2005.04.22.03.00.33;  author jwright;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@jdbcDriver = com.mysql.jdbc.driver
+jdbcURI = jdbc:mysql://localhost:3306/network_@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@

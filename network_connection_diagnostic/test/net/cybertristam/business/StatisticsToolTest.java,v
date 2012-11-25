@@ -1,0 +1,100 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  v1:1.1.1.1 Cybertristam:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2005.04.22.03.00.33;  author jwright;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2005.04.22.03.00.33;  author jwright;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@package net.cybertristam.business;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import junit.framework.TestCase;
+
+/**
+ * StatisticsToolMgr Tester.
+ *
+ * @@author <Authors name>
+ * @@since <pre>04/06/2005</pre>
+ * @@version 1.0
+ */
+public class StatisticsToolTest extends TestCase
+{
+    public StatisticsToolTest(String name)
+    {
+        super(name);
+    }
+
+    public void setUp() throws Exception
+    {
+        super.setUp();
+    }
+
+    public void tearDown() throws Exception
+    {
+        super.tearDown();
+    }
+
+    public void testDetermineServerTCPPortUpTime() throws Exception
+    {
+        StatisticsToolMgr toolMgr = new StatisticsToolMgr();
+        Long time = toolMgr.determineServerTCPPortUpTime("LOCALHOST",new Integer(7));
+        System.out.println("Time is: "+ time);
+    }
+
+    public void testRetrieve() throws Exception
+    {
+        //TODO: Test goes here...
+    }
+
+    public void testDetermineUpTime() throws Exception
+    {
+        //TODO: Test goes here...
+    }
+
+    public void testDetermineDownTime() throws Exception
+    {
+        //TODO: Test goes here...
+    }
+
+    public void testExceptionError() throws Exception
+    {
+        //TODO: Test goes here...
+    }
+
+    public static Test suite()
+    {
+        return new TestSuite(StatisticsToolTest.class);
+    }
+}
+@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@

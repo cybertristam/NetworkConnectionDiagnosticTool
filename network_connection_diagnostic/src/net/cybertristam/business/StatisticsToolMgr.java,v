@@ -1,0 +1,151 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  v1:1.1.1.1 Cybertristam:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2005.04.22.03.00.34;  author jwright;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/**
+ * AUTHOR: jewright
+ * DATE/TIME:  Apr 5, 2005
+ * PROGRAM/FILENAME: net.cybertristam.business.StatisticsToolMgr
+ * EXPLANATION:
+ * TEST DATA & EXPECTED RESULTS:
+ * ENTRY:
+ * EXPECTED RESULTS:
+ * REVISION HISTORY:
+ * VERSION NUMBER     DATE       AUTHOR
+ *     1           Apr 5, 2005      jewright
+ * REQUIREMENTS:
+ * EDITOR/IDE: IntelliJ IDEA with VIM Keymap.
+ */
+
+package net.cybertristam.business;
+import net.cybertristam.dataObjects.ConnectionStatus;
+import net.cybertristam.dataObjects.Statistics;
+import net.cybertristam.dataObjects.TCPPortStatistics;
+import net.cybertristam.exception.StatisticsRetrieveException;
+import net.cybertristam.service.Factory;
+import net.cybertristam.service.IStatisticsSvc;
+import net.cybertristam.service.FilePropertiesReader;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+
+public class StatisticsToolMgr {
+    FilePropertiesReader fpr = new FilePropertiesReader(this.getClass().getSimpleName());
+
+    public StatisticsToolMgr() {
+    }
+
+    public Long determineServerTCPPortUpTime(String address, Integer portNumber) {
+        Statistics stats = retrieve(address,portNumber,Statistics.TCP);
+        List resultList = stats.getSockets();
+        ConnectionStatus conn = (ConnectionStatus) resultList.get(0);
+        if (resultList.size() > 0) {
+            return determineUpTime(stats.getSockets());
+        }
+        else {
+            return null;
+        }
+    }
+
+    private Statistics retrieve(String address, Integer portNumber, String socketType){
+        IStatisticsSvc statsSvc = (IStatisticsSvc) Factory.getInstance().getService(IStatisticsSvc.KEY);
+        Statistics stats = new TCPPortStatistics();
+        try {
+            stats = statsSvc.retrieve(address,portNumber,socketType);
+        } catch (StatisticsRetrieveException ex) {
+            exceptionError(ex);
+            return stats;
+        }
+        return stats;
+    }
+
+    /**
+     * This method determines the amount of Total Up Time from the Statistics provided.
+     * The interval at which statistics are captured determine that no downtime could go
+     * unnoticed. If all stats show connected the service was between the earliest start
+     * time and the oldest stop time.
+     * @@param statistics
+     * @@return
+     */
+    public Long determineUpTime(List statistics) {
+        return determineTime(statistics,ConnectionStatus.CONNECTED);
+    }
+
+    /**
+     * This method determines the amount of Total Up Time from the Statistics provided.
+     * The interval at which statistics are captured determine that no downtime could go
+     * unnoticed. If all stats show connected the service was between the earliest start
+     * time and the oldest stop time.
+     * @@param statistics
+     * @@return
+     */
+    public Long determineDownTime(List statistics) {
+        Long value = determineTime(statistics,ConnectionStatus.CLOSED);
+        value += determineTime(statistics,ConnectionStatus.TIMEOUT);
+        return value;
+    }
+
+    /**
+     * This method determines the total time of a type of connection from
+     * the provided List of Connection Stats.
+     * @@param statistics
+     * @@param typeStatus
+     * @@return
+     */
+    private Long determineTime(List statistics, String typeStatus) {
+        ConnectionStatus[] stats = (ConnectionStatus[]) statistics.toArray(new ConnectionStatus[statistics.size()] );
+        Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone(fpr.getProperty("TimeZone")));
+        Calendar stopTime = new GregorianCalendar(TimeZone.getTimeZone(fpr.getProperty("TimeZone")));
+        for(int i = 0;i < stats.length;i++) {
+            if(stats[i].getStatusType().equals(typeStatus)){
+                if(stats[i].getConnectionStartTime().getTimeInMillis() < startTime.getTimeInMillis()) {
+                    startTime = stats[i].getConnectionStartTime();
+                }
+                if(stats[i].getConnectionEndTime().getTimeInMillis() > stopTime.getTimeInMillis()) {
+                    stopTime = stats[i].getConnectionEndTime();
+                }
+            }
+        }
+        return stopTime.getTimeInMillis() - startTime.getTimeInMillis();
+    }
+
+    protected void exceptionError(Exception ex){
+        ex.printStackTrace();
+    }
+}
+@
+
+
+1.1.1.1
+log
+@no message
+@
+text
+@@
