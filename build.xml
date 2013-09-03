@@ -162,7 +162,22 @@ jar filename. -->
         <javadoc destdir="${api.dir}" author="true" version="true" use="true">
             <fileset dir="src" defaultexcludes="yes">
                 <include name="**/**.java"/>
+                <exclude name="**/*Test.java"/>
             </fileset>
+            <classpath refid="build.classpath"/>
+            <tag name="todo" scope="all" description="To do:"/>
+            <link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp"/>
+            <link href="http://developer.java.sun.com/developer/products/xml/docs/api/"/>
+        </javadoc>
+    </target>
+
+    <!-- Build Java API Docs -->
+    <target name="buildalldocs" depends="docsclean,compile">
+        <javadoc destdir="${api.dir}" author="true" version="true" use="true">
+            <fileset dir="src" defaultexcludes="yes">
+                <include name="**/**.java"/>
+            </fileset>
+            <classpath refid="test.classpath"/>
             <tag name="todo" scope="all" description="To do:"/>
             <link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp"/>
             <link href="http://developer.java.sun.com/developer/products/xml/docs/api/"/>
