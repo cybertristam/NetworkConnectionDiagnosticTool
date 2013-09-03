@@ -54,6 +54,7 @@ jar filename. -->
         <pathelement location="${build.lib}/${jar.file}"/>
         <pathelement path="${build.classpath}"/>
         <pathelement location="${testbuild.classes}"/>
+        <pathelement location="${lib.dir}/junit.jar"/>
     </path>
 
     <!-- Target to create the build directories prior to the compile target -->
