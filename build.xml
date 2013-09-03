@@ -149,7 +149,7 @@ jar filename. -->
     <target name="buildreport">
         <mkdir dir="${finalreport.dir}"/>
         <junitreport todir="${finalreport.dir}">
-            <fileset dir="${report.dir}">
+            <fileset dir="${reports.dir}">
                 <include name="TEST-*.xml"/>
             </fileset>
             <report format="frames" todir="${finalreport.dir}"/>
