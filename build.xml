@@ -1,47 +1,199 @@
 <?xml version="1.0"?>
 
 <!-- build.xml - a simple Ant buildfile -->
-<project name="Network Connection Diagnostic Buildfile" default="compile" basedir=".">
+<!-- Note: This is a generic file, you hopefully
+will only have to change the project name and the
+jar filename. -->
+<project name="NetworkConnectionDiagnosticTool" default="all" basedir=".">
 
     <!-- The directory containing source code -->
     <property name="src.dir" value="src"/>
+    <property name="test.dir" value="test"/>
+    <property name="testsrc.dir" value="${test.dir}/src"/>
     <property name="config.dir" value="configuration"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="reports.dir" value="testreports"/>
+    <property name="finalreport.dir" value="finaltestreport"/>
+    <property name="build.dir" value="bin"/>
+    <property name="api.dir" value="${build.dir}/docs"/>
+    <property name="ant.build.javac.source" value="1.6"/>
+    <property name="ant.build.javac.target" value="1.6"/>
 
-    <!-- The JAR File's Name -->
-    <property name="jar.file" value="network_connection_diagnostic.jar"/>
+    <!-- The JAR File Names -->
+    <property name="jar.file" value="${ant.project.name}.jar"/>
+    <property name="docjar.file" value="${ant.project.name}doc.jar"/>
 
     <!-- Temporary build directories -->
-    <property name="build.dir" value="bin"/>
     <property name="build.classes" value="${build.dir}/classes"/>
     <property name="build.lib" value="${build.dir}/lib"/>
+    <property name="testbuild.dir" value="${test.dir}/bin"/>
+    <property name="testbuild.classes" value="${testbuild.dir}/classes"/>
+    <property name="testbuild.lib" value="${testbuild.dir}/lib"/>
+
+    <!-- Distribution Directories -->
+    <property name="dist.dir" value="dist"/>
+    <property name="distlib.dir" value="${dist.dir}/lib"/>
+
+    <!-- Classpath for Standard Compiling -->
+    <path id="build.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+            <exclude name="**/junit.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Classpath To Build Test Cases -->
+    <path id="testbuild.classpath">
+        <pathelement location="${build.lib}/${jar.file}"/>
+        <pathelement path="${build.classpath}"/>
+        <pathelement location="${lib.dir}/junit.jar"/>
+    </path>
+
+    <!-- Classpath to Run Test Cases -->
+    <path id="test.classpath">
+        <pathelement location="${build.lib}/${jar.file}"/>
+        <pathelement path="${build.classpath}"/>
+        <pathelement location="${testbuild.classes}"/>
+    </path>
 
     <!-- Target to create the build directories prior to the compile target -->
     <target name="prepare">
+        <mkdir dir="${src.dir}"/>
+        <mkdir dir="${test.dir}"/>
+        <mkdir dir="${testsrc.dir}"/>
+        <mkdir dir="${config.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${reports.dir}"/>
+        <mkdir dir="${api.dir}"/>
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.classes}"/>
         <mkdir dir="${build.lib}"/>
+        <mkdir dir="${testbuild.dir}"/>
+        <mkdir dir="${testbuild.classes}"/>
+        <mkdir dir="${testbuild.lib}"/>
     </target>
 
+    <!-- Clean the output directories for both standard and JUnit code. -->
     <target name="clean" description="Removes all generated files">
         <delete dir="${build.dir}"/>
+        <delete dir="${testbuild.dir}"/>
     </target>
 
+    <!-- Clean the JUnit Report Directory of JUnit Reports. -->
+    <target name="reportclean" description="Remoces all reports generated from previous JUnit runs">
+        <delete>
+            <fileset dir="${reports.dir}">
+                <include name="**/*.*"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <!-- Clean the API Documentation Directory -->
+    <target name="docsclean">
+        <delete>
+            <fileset dir="${api.dir}">
+                <include name="**/*.*"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <!-- Compile the standard base code -->
     <target name="compile" depends="prepare" description="Compiles all source code">
-        <javac srcdir="${src.dir}" destdir="${build.classes}"/>
+        <javac srcdir="${src.dir}" destdir="${build.classes}">
+            <include name="**/*.java"/>
+            <!-- Assume Code Ending with Test is a JUnit Test Case. -->
+            <exclude name="**/*Test.java"/>
+            <classpath refid="build.classpath"/>
+        </javac>
     </target>
 
-    <target name="deploy" depends="prepare">
+    <!-- Build the JUnit Test Code -->
+    <target name="test.compile" depends="jar" description="Compile all Test code">
+        <javac srcdir="${testsrc.dir}" destdir="${testbuild.classes}">
+            <include name="**/*Test.java"/>
+            <classpath refid="testbuild.classpath"/>
+        </javac>
+    </target>
+
+    <!-- Build a deploy code base -->
+    <target name="deploy" depends="prepare,compile">
         <copy toDir="${build.classes}">
-           <fileset dir="${config.dir}">
-               <include name="**/*.properties"/>
-           </fileset>
+            <fileset dir="${config.dir}">
+                <include name="**/*.properties"/>
+            </fileset>
         </copy>
     </target>
 
-    <target name="jar" depends="compile" description="Generates jar in the 'dist' directory">
+    <!-- Build Jar File -->
+    <target name="jar" depends="deploy" description="Generates jar in the 'dist' directory">
         <!-- Exclude util tests from the final JAR file -->
-        <jar jarfile="${build.lib}/${jar.file}" basedir="${build.classes}" excludes="**/*Test.class"/>
+        <jar jarfile="${build.lib}/${jar.file}" basedir="${build.classes}" excludes="**/*Test*.class"/>
     </target>
 
-    <target name="all" depends="clean,jar" description="Cleans, Compiles, then Builds the JAR file."/>
+    <!-- Run all JUnit Test Cases in the code base. -->
+    <target name="unittest" depends="clean,reportclean,test.compile" description="Runs the JUnit Test Cases">
+        <mkdir dir="${reports.dir}"/>
+        <junit printsummary="yes" haltonfailure="yes">
+            <classpath refid="test.classpath"/>
+            <formatter type="xml"/>
+            <batchtest fork="yes" todir="${reports.dir}">
+                <fileset dir="${testbuild.classes}">
+                    <include name="**/*Test*.class"/>
+                    <exclude name="**/AllTests.class"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <!-- Build JUnit Test Report -->
+    <target name="buildreport">
+        <mkdir dir="${finalreport.dir}"/>
+        <junitreport todir="${finalreport.dir}">
+            <fileset dir="${report.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${finalreport.dir}"/>
+        </junitreport>
+    </target>
+
+    <!-- Build Java API Docs -->
+    <target name="builddocs" depends="docsclean,compile">
+        <javadoc destdir="${api.dir}" author="true" version="true" use="true">
+            <fileset dir="src" defaultexcludes="yes">
+                <include name="**/**.java"/>
+            </fileset>
+            <tag name="todo" scope="all" description="To do:"/>
+            <link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp"/>
+            <link href="http://developer.java.sun.com/developer/products/xml/docs/api/"/>
+        </javadoc>
+    </target>
+
+    <!-- Build Documentation Jar File -->
+    <target name="docjar" depends="builddocs" description="Generates documentation jar in the 'dist' directory">
+        <!-- Exclude util tests from the final JAR file -->
+        <jar jarfile="${build.lib}/${docjar.file}" basedir="${api.dir}"/>
+    </target>
+
+    <!-- Build all Targets required for executable delivery -->
+    <target name="all" depends="clean,jar" description="Builds all Targets required for an executable delivery."/>
+
+    <!-- Target to build distribution package -->
+    <target name="dist" depends="all">
+        <mkdir dir="${dist.dir}"/>
+        <delete>
+            <fileset dir="${dist.dir}">
+                <include name="**/**"/>
+            </fileset>
+        </delete>
+        <move todir="${dist.dir}">
+            <fileset dir="${build.lib}">
+                <include name="**/*.jar"/>
+            </fileset>
+        </move>
+        <move todir="${distlib.dir}">
+            <fileset dir="${lib.dir}">
+                <include name="**/**"/>
+            </fileset>
+        </move>
+    </target>
 </project>
