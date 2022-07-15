@@ -1,4 +1,5 @@
 NetworkConnectionDiagnosticTool
 ===============================
 
-Network Connection Diagnostic Tool
+Java based Network Connection Diagnostic Tool
+It utilizes tcp sockets to determine network connectivity.
